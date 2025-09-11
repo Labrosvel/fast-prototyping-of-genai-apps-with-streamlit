@@ -17,3 +17,13 @@ def get_dataset_path():
 st.title("Hello, GenAI!")
 st.write("This is your GenAI-powered data processing app.")
 
+# Layout two buttons side by side
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("Ingest Dataset"):
+        pass
+
+with col2:
+    if st.button("Parse Reviews"):
+        pass
