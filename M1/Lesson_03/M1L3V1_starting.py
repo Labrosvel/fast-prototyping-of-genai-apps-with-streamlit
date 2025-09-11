@@ -14,6 +14,13 @@ def get_dataset_path():
     return csv_path
 
 
+# Helper function to clean text
+def clean_text(text):
+    text = text.lower().strip()
+    text = re.sub(r"[^\w\s]", "", text)
+    return text
+
+
 st.title("Hello, GenAI!")
 st.write("This is your GenAI-powered data processing app.")
 
@@ -21,9 +28,39 @@ st.write("This is your GenAI-powered data processing app.")
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("Ingest Dataset"):
-        pass
+    if st.button("📥 Ingest Dataset"):
+        try:
+            csv_path = get_dataset_path()
+            st.session_state["df"] = pd.read_csv(csv_path)
+            st.success("Dataset loaded successfully!")
+        except FileNotFoundError:
+            st.error("Dataset not found. Please check the file path.")
 
 with col2:
-    if st.button("Parse Reviews"):
-        pass
+    if st.button("🧹 Parse Reviews"):
+        if "df" in st.session_state:
+            st.session_state["df"]["CLEANED_SUMMARY"] = st.session_state["df"][
+                "SUMMARY"
+            ].apply(clean_text)
+            st.success("Reviews parsed and cleaned!")
+        else:
+            st.warning("Please ingest the dataset first.")
+
+
+# Display the dataset if it exists
+if "df" in st.session_state:
+    st.subheader("🔍 Filter by Product")
+    product = st.selectbox(
+        "Choose a product",
+        ["All Products"] + list(st.session_state["df"]["PRODUCT"].unique()),
+    )
+
+    st.subheader(f"📁 Reviews for {product}")
+
+    if product != "All Products":
+        filtered_df = st.session_state["df"][
+            st.session_state["df"]["PRODUCT"] == product
+        ]
+    else:
+        filtered_df = st.session_state["df"]
+    st.dataframe(filtered_df)
